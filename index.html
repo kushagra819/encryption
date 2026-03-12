@@ -6,76 +6,186 @@
 <meta charset="UTF-8">
 <title>Secure File Encryption Tool</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 
+*{
+box-sizing:border-box;
+}
+
 body{
-font-family:Arial;
-background:#0f172a;
-color:white;
+
+font-family:'Poppins',sans-serif;
+margin:0;
+height:100vh;
+
+background:linear-gradient(135deg,#1e293b,#0f172a,#020617);
+
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-margin:0;
+
+color:white;
+
 }
 
 .container{
-background:#1e293b;
-padding:40px;
-border-radius:12px;
+
 width:420px;
+padding:35px;
+
+border-radius:16px;
+
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(12px);
+
+box-shadow:0 10px 40px rgba(0,0,0,0.6);
+
 text-align:center;
-box-shadow:0 0 20px rgba(0,0,0,0.5);
+
 }
 
 h1{
+
+margin-top:0;
+font-weight:600;
+
+}
+
+.subtitle{
+
+font-size:13px;
+opacity:0.7;
 margin-bottom:20px;
+
 }
 
 .drop-zone{
+
 border:2px dashed #38bdf8;
-padding:40px;
-border-radius:10px;
-margin-bottom:20px;
+
+border-radius:12px;
+
+padding:40px 20px;
+
 cursor:pointer;
-transition:0.2s;
+
+transition:0.25s;
+
 }
 
 .drop-zone:hover{
-background:#0ea5e933;
+
+background:rgba(56,189,248,0.1);
+
 }
 
 .drop-zone.dragover{
-background:#0ea5e9;
+
+background:#38bdf8;
+color:black;
+
+}
+
+.file-name{
+
+margin-top:10px;
+font-size:13px;
+opacity:0.8;
+
 }
 
 input{
-width:90%;
-padding:10px;
-margin:10px 0;
-border-radius:6px;
+
+width:100%;
+
+padding:12px;
+
+margin-top:18px;
+
 border:none;
+
+border-radius:8px;
+
+outline:none;
+
+background:#0f172a;
+
+color:white;
+
+}
+
+.buttons{
+
+display:flex;
+gap:10px;
+margin-top:20px;
+
 }
 
 button{
-padding:10px 20px;
-margin:10px;
+
+flex:1;
+
+padding:12px;
+
 border:none;
-border-radius:6px;
-background:#38bdf8;
-color:black;
-font-weight:bold;
+
+border-radius:8px;
+
+font-weight:600;
+
 cursor:pointer;
+
+transition:0.2s;
+
 }
 
-button:hover{
+.encrypt{
+
+background:#22c55e;
+color:white;
+
+}
+
+.encrypt:hover{
+
+transform:translateY(-2px);
+background:#16a34a;
+
+}
+
+.decrypt{
+
+background:#38bdf8;
+color:black;
+
+}
+
+.decrypt:hover{
+
+transform:translateY(-2px);
 background:#0ea5e9;
+
 }
 
 .status{
-margin-top:15px;
-font-size:14px;
-color:#94a3b8;
+
+margin-top:18px;
+
+font-size:13px;
+
+opacity:0.8;
+
+}
+
+.footer{
+
+margin-top:25px;
+font-size:11px;
+opacity:0.5;
+
 }
 
 </style>
@@ -88,81 +198,129 @@ color:#94a3b8;
 
 <h1>File Encryption Tool</h1>
 
+<div class="subtitle">
+Secure AES-256 browser encryption
+</div>
+
 <div class="drop-zone" id="dropZone">
-Drag & Drop File Here<br>
-<span style="font-size:12px;">or click to select file</span>
+
+Drag & Drop File  
+<br><br>
+<span style="font-size:12px;opacity:0.7;">or click to choose</span>
+
+<div class="file-name" id="fileName"></div>
+
 </div>
 
 <input type="file" id="fileInput" hidden>
 
-<input type="password" id="password" placeholder="Enter Password">
+<input type="password" id="password" placeholder="Enter password">
 
-<br>
+<div class="buttons">
 
-<button onclick="encryptFile()">Encrypt</button>
-<button onclick="decryptFile()">Decrypt</button>
+<button class="encrypt" onclick="encryptFile()">Encrypt</button>
+
+<button class="decrypt" onclick="decryptFile()">Decrypt</button>
+
+</div>
 
 <div class="status" id="status"></div>
+
+<div class="footer">
+Client-side encryption • No files uploaded
+</div>
 
 </div>
 
 <script>
 
-let selectedFile = null;
+let selectedFile=null;
 
-const dropZone = document.getElementById("dropZone");
-const fileInput = document.getElementById("fileInput");
-const statusText = document.getElementById("status");
+const dropZone=document.getElementById("dropZone");
+const fileInput=document.getElementById("fileInput");
+const fileName=document.getElementById("fileName");
+const statusText=document.getElementById("status");
 
-dropZone.addEventListener("click", () => {
+dropZone.addEventListener("click",()=>{
+
 fileInput.click();
+
 });
 
-fileInput.addEventListener("change", () => {
-selectedFile = fileInput.files[0];
-dropZone.innerHTML = "Selected: <br>" + selectedFile.name;
+fileInput.addEventListener("change",()=>{
+
+selectedFile=fileInput.files[0];
+
+fileName.innerText=selectedFile.name;
+
 });
 
-dropZone.addEventListener("dragover", (e) => {
+dropZone.addEventListener("dragover",(e)=>{
+
 e.preventDefault();
+
 dropZone.classList.add("dragover");
+
 });
 
-dropZone.addEventListener("dragleave", () => {
+dropZone.addEventListener("dragleave",()=>{
+
 dropZone.classList.remove("dragover");
+
 });
 
-dropZone.addEventListener("drop", (e) => {
+dropZone.addEventListener("drop",(e)=>{
+
 e.preventDefault();
+
 dropZone.classList.remove("dragover");
 
-selectedFile = e.dataTransfer.files[0];
-dropZone.innerHTML = "Selected: <br>" + selectedFile.name;
+selectedFile=e.dataTransfer.files[0];
+
+fileName.innerText=selectedFile.name;
+
 });
 
 async function getKey(password){
 
-const enc = new TextEncoder();
+const enc=new TextEncoder();
 
-const keyMaterial = await crypto.subtle.importKey(
+const keyMaterial=await crypto.subtle.importKey(
+
 "raw",
+
 enc.encode(password),
+
 {name:"PBKDF2"},
+
 false,
+
 ["deriveKey"]
+
 );
 
 return crypto.subtle.deriveKey(
+
 {
+
 name:"PBKDF2",
+
 salt:enc.encode("file-encryption-salt"),
+
 iterations:100000,
+
 hash:"SHA-256"
+
 },
+
 keyMaterial,
+
 {name:"AES-GCM",length:256},
+
 false,
+
 ["encrypt","decrypt"]
+
 );
 
 }
@@ -170,80 +328,104 @@ false,
 async function encryptFile(){
 
 if(!selectedFile){
-alert("Select or drop a file first");
+
+alert("Select a file first");
+
 return;
+
 }
 
-const password = document.getElementById("password").value;
+const password=document.getElementById("password").value;
 
-if(password === ""){
+if(password===""){
+
 alert("Enter password");
+
 return;
+
 }
 
-statusText.innerText = "Encrypting...";
+statusText.innerText="Encrypting file...";
 
-const key = await getKey(password);
+const key=await getKey(password);
 
-const iv = crypto.getRandomValues(new Uint8Array(12));
+const iv=crypto.getRandomValues(new Uint8Array(12));
 
-const fileData = await selectedFile.arrayBuffer();
+const fileData=await selectedFile.arrayBuffer();
 
-const encrypted = await crypto.subtle.encrypt(
+const encrypted=await crypto.subtle.encrypt(
+
 {name:"AES-GCM",iv:iv},
+
 key,
+
 fileData
+
 );
 
-const blob = new Blob([iv,new Uint8Array(encrypted)]);
+const blob=new Blob([iv,new Uint8Array(encrypted)]);
 
-download(blob,selectedFile.name + ".enc");
+download(blob,selectedFile.name+".enc");
 
-statusText.innerText = "Encryption complete";
+statusText.innerText="Encryption complete";
 
 }
 
 async function decryptFile(){
 
 if(!selectedFile){
-alert("Select encrypted file first");
+
+alert("Select encrypted file");
+
 return;
+
 }
 
-const password = document.getElementById("password").value;
+const password=document.getElementById("password").value;
 
-if(password === ""){
+if(password===""){
+
 alert("Enter password");
+
 return;
+
 }
 
-statusText.innerText = "Decrypting...";
+statusText.innerText="Decrypting file...";
 
 try{
 
-const key = await getKey(password);
+const key=await getKey(password);
 
-const data = new Uint8Array(await selectedFile.arrayBuffer());
+const data=new Uint8Array(await selectedFile.arrayBuffer());
 
-const iv = data.slice(0,12);
-const encrypted = data.slice(12);
+const iv=data.slice(0,12);
 
-const decrypted = await crypto.subtle.decrypt(
+const encrypted=data.slice(12);
+
+const decrypted=await crypto.subtle.decrypt(
+
 {name:"AES-GCM",iv:iv},
+
 key,
+
 encrypted
+
 );
 
-const blob = new Blob([decrypted]);
+const blob=new Blob([decrypted]);
 
-download(blob,"decrypted_" + selectedFile.name.replace(".enc",""));
+download(blob,"decrypted_"+selectedFile.name.replace(".enc",""));
 
-statusText.innerText = "Decryption complete";
+statusText.innerText="Decryption complete";
 
-}catch(e){
+}
+
+catch{
 
 alert("Wrong password or corrupted file");
-statusText.innerText = "";
+
+statusText.innerText="";
 
 }
 
@@ -251,10 +433,11 @@ statusText.innerText = "";
 
 function download(blob,name){
 
-const a = document.createElement("a");
+const a=document.createElement("a");
 
-a.href = URL.createObjectURL(blob);
-a.download = name;
+a.href=URL.createObjectURL(blob);
+
+a.download=name;
 
 a.click();
 
